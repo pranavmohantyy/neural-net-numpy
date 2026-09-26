@@ -7,3 +7,9 @@ class DenseLayer:
 
     def forward(self, X):
         return X @ self.W + self.b
+
+    def compute_gradients(self, X, y_true, y_pred):
+        dW = X.T @ (y_pred - y_true) / y_true.shape[0]
+        db = np.sum(y_pred - y_true, axis=0, keepdims=True) / y_true.shape[0]
+        dX = (y_pred - y_true) @ self.W.T
+        return dW, db, dX
