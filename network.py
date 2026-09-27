@@ -21,14 +21,18 @@ class NeuralNetwork:
         self.loss = mean_squared_error(y_true, y_pred)
         return self.loss
 
-    def backward(self, X, y_true):
-        loss_derivative = mean_squared_error_derivative(y_true, self.forward(X))
+    def backward(self, X, y_true, y_pred):
         for layer in reversed(self.layers):
-            loss_derivative = layer.compute_gradients(X, y_true, loss_derivative)
+            dW, db, dX = layer.compute_gradients(X, y_true, y_pred)
             self.optimizer.update_params(layer)
+            X = dX
 
-    def train(self, X, y_true):
-        y_pred = self.forward(X)
-        loss = self.compute_loss(y_true, y_pred)
-        self.backward(X, y_true)
-        return loss
+    def train(self, X, y, epochs=10, batch_size=32):
+        for epoch in range(epochs):
+            for i in range(0, len(X), batch_size):
+                X_batch = X[i:i + batch_size]
+                y_batch = y[i:i + batch_size]
+                y_pred = self.forward(X_batch)
+                loss = self.compute_loss(y_batch, y_pred)
+                self.backward(X_batch, y_batch, y_pred)
+            print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss}")
