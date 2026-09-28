@@ -11,5 +11,5 @@ class SGD:
             if isinstance(param, np.ndarray):
                 if name not in self.velocities:
                     self.velocities[name] = np.zeros_like(param)
-                self.velocities[name] = self.momentum * self.velocities[name] - self.learning_rate * param
+                self.velocities[name] = self.momentum * self.velocities[name] - self.learning_rate * layer.__dict__[name]
                 layer.__dict__[name] += self.velocities[name]
