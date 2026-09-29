@@ -22,17 +22,25 @@ class NeuralNetwork:
         return self.loss
 
     def backward(self, X, y_true, y_pred):
+        gradients = []
+        d_loss = mean_squared_error_derivative(y_true, y_pred)
         for layer in reversed(self.layers):
-            dW, db, dX = layer.compute_gradients(X, y_true, y_pred)
-            self.optimizer.update_params(layer)
-            X = dX
+            d_loss, dW, db = layer.compute_gradients(X, y_true, y_pred)
+            gradients.append((dW, db))
+            d_loss = layer.backward(d_loss)
+        return gradients
 
-    def train(self, X, y, epochs=10, batch_size=32):
+    def train(self, X, y_true, epochs):
         for epoch in range(epochs):
-            for i in range(0, len(X), batch_size):
-                X_batch = X[i:i + batch_size]
-                y_batch = y[i:i + batch_size]
-                y_pred = self.forward(X_batch)
-                loss = self.compute_loss(y_batch, y_pred)
-                self.backward(X_batch, y_batch, y_pred)
-            print(f"Epoch {epoch + 1}/{epochs}, Loss: {loss}")
+            y_pred = self.forward(X)
+            loss = self.compute_loss(y_true, y_pred)
+            self.backward(X, y_true, y_pred)
+            for layer in self.layers:
+                self.optimizer.update_params(layer)
+            acc = self.calculate_accuracy(y_true, y_pred)
+            print(f"Epoch {epoch + 1}, Loss: {loss}, Accuracy: {acc}")
+
+    def calculate_accuracy(self, y_true, y_pred):
+        y_pred_classes = np.argmax(y_pred, axis=1)
+        y_true_classes = np.argmax(y_true, axis=1)
+        return np.mean(y_pred_classes == y_true_classes)
