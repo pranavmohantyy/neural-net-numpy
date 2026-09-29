@@ -37,10 +37,3 @@ class NeuralNetwork:
             self.backward(X, y_true, y_pred)
             for layer in self.layers:
                 self.optimizer.update_params(layer)
-            acc = self.calculate_accuracy(y_true, y_pred)
-            print(f"Epoch {epoch + 1}, Loss: {loss}, Accuracy: {acc}")
-
-    def calculate_accuracy(self, y_true, y_pred):
-        y_pred_classes = np.argmax(y_pred, axis=1)
-        y_true_classes = np.argmax(y_true, axis=1)
-        return np.mean(y_pred_classes == y_true_classes)
