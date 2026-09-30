@@ -22,18 +22,15 @@ class NeuralNetwork:
         return self.loss
 
     def backward(self, X, y_true, y_pred):
-        gradients = []
-        d_loss = mean_squared_error_derivative(y_true, y_pred)
+        gradients = mean_squared_error_derivative(y_true, y_pred)
         for layer in reversed(self.layers):
-            d_loss, dW, db = layer.compute_gradients(X, y_true, y_pred)
-            gradients.append((dW, db))
-            d_loss = layer.backward(d_loss)
-        return gradients
+            gradients = layer.compute_gradients(X, y_true, y_pred)
+            self.optimizer.update_params(layer)
 
     def train(self, X, y_true, epochs):
         for epoch in range(epochs):
             y_pred = self.forward(X)
             loss = self.compute_loss(y_true, y_pred)
             self.backward(X, y_true, y_pred)
-            for layer in self.layers:
-                self.optimizer.update_params(layer)
+            accuracy = np.mean(np.argmax(y_pred, axis=1) == np.argmax(y_true, axis=1))
+            print(f'Epoch {epoch + 1}/{epochs}, Loss: {loss}, Accuracy: {accuracy}')
